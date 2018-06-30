@@ -1,0 +1,29 @@
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"> </script>
+<script src="static/js/microexpnet.js"> </script>
+</head>
+<body>
+<img id="face" src="static/img/face.png"></img>
+<div id="result"></div>
+<canvas id="canvas"></canvas>
+<script>
+const faceE = document.getElementById('face');
+faceE.onload = async () => {
+  const resultE = document.getElementById('result')
+  const microexpnet = new MicroExpNet();
+  await microexpnet.load();
+  const pixels = tf.fromPixels(faceE).toFloat();
+  // rgb2gray
+  const [r, g, b] = tf.split(pixels, [1, 1, 1], 2);
+  const gray_pixels = r.mul(tf.scalar(0.2126))
+    .add(g.mul(tf.scalar(0.7152)))
+    .add(b.mul(tf.scalar(0.0722)))
+  const result = microexpnet.predict(gray_pixels);
+  const topClass = microexpnet.getTopKClass(result);
+  resultE.innerText = topClass;
+  microexpnet.dispose();
+}
+</script>
+</body>
+</html>
